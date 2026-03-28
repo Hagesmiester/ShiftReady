@@ -293,7 +293,21 @@ select.input { appearance: none; }
 
 <script>
 // ---- STATE ----
-var tasks = [];
+var tasks = [
+  { id:1001, name:'Morning routine — shower & dress', note:'Transfer to shower chair. Preferred soap in caddy left side. Likes warm not hot. Dress laid out night before on bed.', freq:'daily', priority:'must', done:false },
+  { id:1002, name:'Medication — morning', note:'Blister pack in kitchen top drawer left of sink. 2 tabs with breakfast. Log on medication sheet on fridge.', freq:'daily', priority:'must', done:false },
+  { id:1003, name:'Medication — evening', note:'1 tab with dinner. Same blister pack, evening section. Log on med sheet.', freq:'daily', priority:'must', done:false },
+  { id:1004, name:'Pressure relief reminders', note:'Remind Mark to shift weight every 30 min if he forgets. Note any redness on skin check.', freq:'daily', priority:'must', done:false },
+  { id:1005, name:'Wash dishes & wipe benches', note:'All dishes washed, dried, put away. Wipe benches and stovetop. Empty compost bin if full.', freq:'daily', priority:'must', done:false },
+  { id:1006, name:'Check & sort mail', note:'Collect from letterbox. Open & sort. Bills go on desk in study. Junk in recycling.', freq:'daily', priority:'nice', done:false },
+  { id:1007, name:'Washing — clothes', note:'Check hamper in bathroom. Wash, hang on line or use dryer if raining. Fold & put away.', freq:'weekly', priority:'must', done:false },
+  { id:1008, name:'Clean bathroom', note:'Toilet, basin, mirror, floor. Cleaning products under basin. Replace towels from linen cupboard in hall.', freq:'weekly', priority:'must', done:false },
+  { id:1009, name:'Change bed linen', note:'Strip bed, fresh sheets from hall linen cupboard (2nd shelf). Fitted sheet first, then flat, 2 pillows.', freq:'weekly', priority:'nice', done:false },
+  { id:1010, name:'Vacuum all rooms', note:'Lounge, bedroom, hallway. Dyson in hall cupboard — empty canister after each use.', freq:'weekly', priority:'nice', done:false },
+  { id:1011, name:'Clean fridge', note:'Remove everything, wipe shelves, check expiry dates, discard anything off. Restock neatly.', freq:'weekly', priority:'nice', done:false },
+  { id:1012, name:'Grocery shop', note:'Mark will have a list on the fridge whiteboard or in his phone. Woolworths preferred. Keep receipt.', freq:'weekly', priority:'must', done:false },
+  { id:1013, name:'Mop hard floors', note:'Kitchen and bathroom floors. Mop & bucket in laundry. Use the eucalyptus floor cleaner only.', freq:'weekly', priority:'nice', done:false },
+];
 var workers = [];
 var todayWorker = null;
 var appt = null;
