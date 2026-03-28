@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ShiftReady</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --green: #1D9E75; --green-light: #E1F5EE; --green-mid: #9FE1CB; --green-dark: #085041;
+  --amber: #BA7517; --amber-light: #FAEEDA; --amber-mid: #FAC775;
+  --coral: #D85A30; --coral-light: #FAECE7;
+  --gray: #5F5E5A; --gray-light: #F1EFE8; --gray-mid: #D3D1C7;
+  --text: #2C2C2A; --text-muted: #5F5E5A;
+  --surface: #F8F7F2; --border: rgba(0,0,0,0.1);
+  --radius: 10px; --font: system-ui, -apple-system, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #E8E6DE; --text-muted: #9C9A92;
+    --surface: #2A2A28; --border: rgba(255,255,255,0.1);
+    --green-light: #04342C; --green-mid: #085041;
+    --amber-light: #412402; --amber-mid: #633806;
+    --coral-light: #4A1B0C;
+    --gray-light: #2C2C2A; --gray-mid: #444441;
+  }
+}
+body { background: #fff; font-family: var(--font); color: var(--text); min-height: 100vh; }
+@media (prefers-color-scheme: dark) { body { background: #1A1A18; } }
+
+.app { max-width: 480px; margin: 0 auto; min-height: 100vh; position: relative; }
+
+/* TAB BAR */
+.tab-bar { display: flex; border-bottom: 1px solid var(--border); background: #fff; position: sticky; top: 0; z-index: 10; }
+@media (prefers-color-scheme: dark) { .tab-bar { background: #1A1A18; } }
+.tab-btn { flex: 1; padding: 11px 4px 9px; border: none; background: none; font-family: var(--font); font-size: 11px; font-weight: 500; color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+.tab-btn.active { color: var(--green); border-bottom-color: var(--green); }
+.tab-icon { font-size: 15px; display: block; margin-bottom: 2px; }
+.screen { display: none; padding: 14px; }
+.screen.active { display: block; }
+
+/* TYPOGRAPHY */
+.section-label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-bottom: 8px; margin-top: 18px; }
+.section-label:first-child { margin-top: 0; }
+
+/* CARDS */
+.card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; }
+.card-row { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border-bottom: 1px solid var(--border); font-size: 14px; color: var(--text); }
+.card-row:last-child { border-bottom: none; }
+
+/* BADGES */
+.badge { font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: 20px; }
+.badge-green { background: var(--green-light); color: #085041; }
+.badge-amber { background: var(--amber-light); color: #633806; }
+.badge-coral { background: var(--coral-light); color: #4A1B0C; }
+.badge-gray  { background: var(--gray-light);  color: #444441; }
+@media (prefers-color-scheme: dark) {
+  .badge-green { color: #9FE1CB; }
+  .badge-amber { color: #FAC775; }
+  .badge-coral { color: #F5C4B3; }
+  .badge-gray  { color: #B4B2A9; }
+}
+
+/* BUTTONS */
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 8px; border: none; font-family: var(--font); font-size: 13px; font-weight: 500; cursor: pointer; transition: opacity 0.15s; text-decoration: none; }
+.btn:hover { opacity: 0.85; }
+.btn-primary { background: var(--green); color: #fff; }
+.btn-whatsapp { background: #25D366; color: #fff; }
+.btn-ghost { background: var(--gray-light); color: var(--gray); }
+.btn-sm { padding: 5px 10px; font-size: 12px; }
+
+/* INPUTS */
+.input { width: 100%; padding: 8px 11px; border-radius: 8px; border: 1px solid var(--border); font-family: var(--font); font-size: 14px; background: #fff; color: var(--text); margin-bottom: 8px; }
+@media (prefers-color-scheme: dark) { .input { background: #2A2A28; } }
+.input:focus { outline: none; border-color: var(--green); }
+.input-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.input-row .input { margin-bottom: 0; }
+select.input { appearance: none; }
+.add-form { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--green-mid); padding: 14px; margin-top: 10px; }
+.form-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
+
+/* TASK ITEMS */
+.task-item { display: flex; align-items: flex-start; gap: 10px; padding: 11px 14px; border-bottom: 1px solid var(--border); }
+.task-item:last-child { border-bottom: none; }
+.task-info { flex: 1; min-width: 0; }
+.task-name { font-size: 14px; color: var(--text); font-weight: 500; margin-bottom: 3px; }
+.task-meta { font-size: 12px; color: var(--text-muted); display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.icon-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); font-size: 13px; padding: 4px 6px; border-radius: 6px; }
+.icon-btn:hover { background: var(--gray-light); }
+.tag { font-size: 11px; background: var(--gray-light); color: var(--gray); border-radius: 4px; padding: 1px 6px; }
+.priority-must { border-left: 3px solid var(--coral); }
+.priority-nice { border-left: 3px solid var(--gray-mid); }
+
+/* SHIFT HERO */
+.shift-hero { background: linear-gradient(135deg, #085041 0%, #1D9E75 100%); border-radius: var(--radius); padding: 16px; color: #fff; margin-bottom: 14px; }
+.shift-hero-name { font-size: 18px; font-weight: 600; margin-bottom: 4px; }
+.shift-hero-time { font-size: 13px; opacity: 0.8; }
+.shift-hero-apt { margin-top: 10px; background: rgba(255,255,255,0.15); border-radius: 7px; padding: 8px 12px; font-size: 13px; display: flex; align-items: center; gap: 8px; }
+
+/* HANDOVER */
+.handover-box { background: var(--amber-light); border-radius: var(--radius); border: 1px solid var(--amber-mid); padding: 12px 14px; margin-bottom: 14px; }
+.handover-label { font-size: 11px; font-weight: 500; color: var(--amber); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; }
+.handover-text { font-size: 13px; color: var(--text); line-height: 1.5; }
+.handover-write textarea { width: 100%; min-height: 80px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); font-family: var(--font); font-size: 14px; background: #fff; color: var(--text); resize: vertical; margin-bottom: 8px; }
+@media (prefers-color-scheme: dark) { .handover-write textarea { background: #2A2A28; } }
+.handover-write textarea:focus { outline: none; border-color: var(--green); }
+
+/* PROGRESS */
+.progress-bar-wrap { height: 4px; background: var(--gray-light); border-radius: 2px; margin-bottom: 14px; overflow: hidden; }
+.progress-bar-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width 0.3s ease; }
+
+/* CHECKLIST */
+.checklist-item { display: flex; align-items: flex-start; gap: 10px; padding: 11px 14px; border-bottom: 1px solid var(--border); cursor: pointer; -webkit-tap-highlight-color: transparent; }
+.checklist-item:last-child { border-bottom: none; }
+.checklist-item:active { background: var(--gray-light); }
+.check-box { width: 22px; height: 22px; border-radius: 6px; border: 1.5px solid var(--gray-mid); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; transition: all 0.15s; font-size: 13px; color: #fff; }
+.checklist-item.done .check-box { background: var(--green); border-color: var(--green); }
+.checklist-item.done .check-label { text-decoration: line-through; color: var(--text-muted); }
+.check-label { font-size: 14px; color: var(--text); flex: 1; }
+.check-note { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+/* TODAY CARD */
+.today-card { background: var(--green-light); border-radius: var(--radius); border: 1px solid var(--green-mid); padding: 14px; margin-bottom: 14px; }
+.today-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 6px; }
+.today-title { font-size: 15px; font-weight: 600; color: #085041; }
+@media (prefers-color-scheme: dark) { .today-title { color: var(--green-mid); } }
+.today-sub { font-size: 12px; color: #0F6E56; margin-top: 2px; }
+@media (prefers-color-scheme: dark) { .today-sub { color: #5DCAA5; } }
+
+/* WA PREVIEW */
+.wa-preview { background: #fff; border-radius: 8px; border: 1px solid var(--gray-mid); padding: 12px; margin-top: 10px; font-size: 12px; color: #2C2C2A; line-height: 1.6; white-space: pre-wrap; max-height: 180px; overflow-y: auto; }
+.wa-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+
+/* APPT ALERT */
+.appt-box { background: var(--coral-light); border-radius: 8px; border: 1px solid #F5C4B3; padding: 10px 12px; margin-top: 8px; display: flex; align-items: center; gap: 10px; }
+.appt-box-text { flex: 1; font-size: 13px; color: var(--text); }
+
+/* WORKERS */
+.worker-card { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+.worker-card:last-child { border-bottom: none; }
+.worker-avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--green-light); display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 600; color: var(--green-dark); flex-shrink: 0; }
+.worker-info { flex: 1; }
+.worker-name { font-size: 14px; font-weight: 500; color: var(--text); }
+.worker-num { font-size: 12px; color: var(--text-muted); font-family: monospace; }
+
+/* MISC */
+.divider { height: 1px; background: var(--border); margin: 14px 0; }
+.empty-state { text-align: center; padding: 24px 16px; color: var(--text-muted); font-size: 14px; }
+.sent-status { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--green); font-weight: 500; margin-top: 6px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- TAB BAR -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab('mark')"><span class="tab-icon">⚙️</span>Mark</button>
+    <button class="tab-btn" onclick="showTab('worker')"><span class="tab-icon">📋</span>Worker</button>
+    <button class="tab-btn" onclick="showTab('workers-list')"><span class="tab-icon">👥</span>Workers</button>
+    <button class="tab-btn" onclick="showTab('appt')"><span class="tab-icon">📅</span>Appointment</button>
+  </div>
+
+  <!-- ===== MARK'S VIEW ===== -->
+  <div id="tab-mark" class="screen active">
+    <div class="today-card">
+      <div class="today-top">
+        <div>
+          <div class="today-title">Today — <span id="today-worker-name">Add a worker</span></div>
+          <div class="today-sub" id="today-shift-time">Set shift time below &nbsp;·&nbsp; <span id="today-task-count">0</span> tasks</div>
+        </div>
+        <button class="btn btn-sm btn-ghost" onclick="showBriefingPreview()">Preview &amp; Send</button>
+      </div>
+      <div id="appt-alert" style="display:none" class="appt-box">
+        <span style="font-size:16px">⏰</span>
+        <div class="appt-box-text"><strong id="appt-alert-text"></strong></div>
+      </div>
+      <div id="wa-preview-box" style="display:none">
+        <div class="wa-preview" id="wa-message-text"></div>
+        <div class="wa-actions">
+          <a id="wa-link" href="#" class="btn btn-whatsapp"><span>💬</span> Open in WhatsApp</a>
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('wa-preview-box').style.display='none'">Close</button>
+        </div>
+        <div id="sent-confirm" style="display:none" class="sent-status"><span>✓</span> Briefing opened in WhatsApp</div>
+      </div>
+    </div>
+
+    <div class="section-label">Must-do tasks today</div>
+    <div class="card" id="must-list"><div class="empty-state">No must-do tasks yet</div></div>
+
+    <div class="section-label" style="margin-top:14px">Nice-to-do if time</div>
+    <div class="card" id="nice-list"><div class="empty-state">No nice-to-do tasks yet</div></div>
+
+    <div id="add-form" style="display:none" class="add-form">
+      <input class="input" id="new-task-name" placeholder="Task name (e.g. Morning shower and dress)" />
+      <input class="input" id="new-task-note" placeholder="Note for worker (optional)" />
+      <div class="input-row">
+        <select class="input" id="new-task-freq">
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="today">Today only</option>
+        </select>
+        <select class="input" id="new-task-priority">
+          <option value="must">Must do</option>
+          <option value="nice">Nice to do</option>
+        </select>
+      </div>
+      <div class="form-actions">
+        <button class="btn btn-ghost btn-sm" onclick="closeAddForm()">Cancel</button>
+        <button class="btn btn-primary btn-sm" onclick="saveTask()">Add task</button>
+      </div>
+    </div>
+
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-ghost" onclick="openAddForm()">+ Add task</button>
+    </div>
+
+    <div class="divider"></div>
+    <div class="section-label">Last shift handover</div>
+    <div class="handover-box" id="last-handover-box">
+      <div class="handover-label">No handover yet</div>
+      <div class="handover-text">Nothing logged from the last shift.</div>
+    </div>
+  </div>
+
+  <!-- ===== WORKER VIEW ===== -->
+  <div id="tab-worker" class="screen">
+    <div class="shift-hero">
+      <div class="shift-hero-name">Hi <span id="w-worker-name">there</span> 👋</div>
+      <div class="shift-hero-time">Today with Mark: <span id="w-shift-time">check with Mark for shift time</span></div>
+      <div id="w-appt-alert" style="display:none" class="shift-hero-apt">
+        <span>⏰</span><span id="w-appt-text"></span>
+      </div>
+    </div>
+
+    <div class="handover-box" id="w-handover-box">
+      <div class="handover-label">From last worker</div>
+      <div class="handover-text">Nothing logged from the last shift.</div>
+    </div>
+
+    <div class="section-label">Must-do tasks</div>
+    <div class="progress-bar-wrap"><div class="progress-bar-fill" id="must-progress" style="width:0%"></div></div>
+    <div class="card" id="worker-must-list"><div class="empty-state">No tasks yet</div></div>
+
+    <div class="section-label" style="margin-top:14px">Nice-to-do if time</div>
+    <div class="card" id="worker-nice-list"><div class="empty-state">No tasks yet</div></div>
+
+    <div class="divider"></div>
+    <div class="section-label">End of shift handover</div>
+    <div class="handover-write">
+      <textarea id="handover-text" placeholder="What did you get done? Anything the next worker should know?"></textarea>
+      <button class="btn btn-primary" onclick="submitHandover()">Submit handover</button>
+    </div>
+    <div id="handover-done" style="display:none" class="sent-status"><span>✓</span> Handover saved</div>
+  </div>
+
+  <!-- ===== WORKERS LIST ===== -->
+  <div id="tab-workers-list" class="screen">
+    <div class="section-label">Support workers</div>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:10px">Add each worker's name and mobile. Tap "Set today" before sending the briefing.</p>
+    <div class="card" id="workers-card"><div class="empty-state">No workers added yet</div></div>
+
+    <div id="worker-add-form" style="display:none" class="add-form">
+      <input class="input" id="new-worker-name" placeholder="Full name (e.g. Maria Santos)" />
+      <input class="input" id="new-worker-num" placeholder="Mobile number (e.g. 0412 345 678)" type="tel" />
+      <div class="form-actions">
+        <button class="btn btn-ghost btn-sm" onclick="closeWorkerForm()">Cancel</button>
+        <button class="btn btn-primary btn-sm" onclick="saveWorker()">Add worker</button>
+      </div>
+    </div>
+    <div style="margin-top:10px">
+      <button class="btn btn-ghost" onclick="openWorkerForm()">+ Add worker</button>
+    </div>
+  </div>
+
+  <!-- ===== APPOINTMENT TAB ===== -->
+  <div id="tab-appt" class="screen">
+    <div class="section-label">Upcoming appointment</div>
+    <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">Fill this in any time — it auto-appears in the briefing and worker view.</p>
+    <div class="card" style="padding:14px">
+      <input class="input" id="appt-type" placeholder="Type (e.g. Physio, GP, Dentist)" />
+      <input class="input" id="appt-time" placeholder="Appointment time (e.g. 10:00am)" />
+      <input class="input" id="appt-location" placeholder="Location (e.g. Subiaco Physio, Hay St)" />
+      <input class="input" id="appt-leave" placeholder="Leave by (e.g. 9:30am)" />
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="saveAppt()">Save appointment</button>
+        <button class="btn btn-ghost" onclick="clearAppt()">Clear</button>
+      </div>
+      <div id="appt-saved" style="display:none" class="sent-status"><span>✓</span> Saved — will appear in next briefing</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ---- STATE ----
+var tasks = [];
+var workers = [];
+var todayWorker = null;
+var appt = null;
+var lastHandover = null;
+
+// ---- LOAD from localStorage ----
+function loadState() {
+  try {
+    var t = localStorage.getItem('sr_tasks');
+    var w = localStorage.getItem('sr_workers');
+    var tw = localStorage.getItem('sr_today_worker');
+    var a = localStorage.getItem('sr_appt');
+    var lh = localStorage.getItem('sr_last_handover');
+    if (t) tasks = JSON.parse(t);
+    if (w) workers = JSON.parse(w);
+    if (tw) todayWorker = JSON.parse(tw);
+    if (a) appt = JSON.parse(a);
+    if (lh) lastHandover = JSON.parse(lh);
+  } catch(e) {}
+}
+
+function saveState() {
+  try {
+    localStorage.setItem('sr_tasks', JSON.stringify(tasks));
+    localStorage.setItem('sr_workers', JSON.stringify(workers));
+    localStorage.setItem('sr_today_worker', JSON.stringify(todayWorker));
+    localStorage.setItem('sr_appt', JSON.stringify(appt));
+    localStorage.setItem('sr_last_handover', JSON.stringify(lastHandover));
+  } catch(e) {}
+}
+
+// ---- HELPERS ----
+function freqBadge(f) {
+  if (f === 'daily')  return '<span class="badge badge-green">Daily</span>';
+  if (f === 'weekly') return '<span class="badge badge-amber">Weekly</span>';
+  return '<span class="badge badge-coral">Today only</span>';
+}
+
+function updateTodayHeader() {
+  var name = todayWorker ? todayWorker.name : 'No worker set';
+  document.getElementById('today-worker-name').textContent = name;
+  document.getElementById('w-worker-name').textContent = todayWorker ? todayWorker.name.split(' ')[0] : 'there';
+  document.getElementById('today-task-count').textContent = tasks.length;
+}
+
+// ---- RENDER MARK TASKS ----
+function renderMarkTasks() {
+  var must = tasks.filter(function(t){ return t.priority === 'must'; });
+  var nice = tasks.filter(function(t){ return t.priority === 'nice'; });
+  function row(t) {
+    return '<div class="task-item priority-' + t.priority + '">'
+      + '<div class="task-info">'
+      + '<div class="task-name">' + t.name + '</div>'
+      + '<div class="task-meta">' + freqBadge(t.freq) + (t.note ? '<span class="tag">' + t.note + '</span>' : '') + '</div>'
+      + '</div>'
+      + '<button class="icon-btn" onclick="deleteTask(' + t.id + ')">✕</button>'
+      + '</div>';
+  }
+  document.getElementById('must-list').innerHTML = must.length ? must.map(row).join('') : '<div class="empty-state">No must-do tasks yet</div>';
+  document.getElementById('nice-list').innerHTML = nice.length ? nice.map(row).join('') : '<div class="empty-state">No nice-to-do tasks yet</div>';
+  document.getElementById('today-task-count').textContent = tasks.length;
+}
+
+// ---- RENDER WORKER LISTS ----
+function renderWorkerLists() {
+  var must = tasks.filter(function(t){ return t.priority === 'must'; });
+  var nice = tasks.filter(function(t){ return t.priority === 'nice'; });
+  function row(t) {
+    var cls = 'checklist-item priority-' + t.priority + (t.done ? ' done' : '');
+    return '<div class="' + cls + '" onclick="toggleCheck(' + t.id + ')">'
+      + '<div class="check-box">' + (t.done ? '✓' : '') + '</div>'
+      + '<div><div class="check-label">' + t.name + '</div>'
+      + (t.note ? '<div class="check-note">' + t.note + '</div>' : '')
+      + '</div></div>';
+  }
+  document.getElementById('worker-must-list').innerHTML = must.length ? must.map(row).join('') : '<div class="empty-state">No tasks yet</div>';
+  document.getElementById('worker-nice-list').innerHTML = nice.length ? nice.map(row).join('') : '<div class="empty-state">No tasks yet</div>';
+  var mustDone = must.filter(function(t){ return t.done; }).length;
+  var pct = must.length ? Math.round((mustDone / must.length) * 100) : 0;
+  document.getElementById('must-progress').style.width = pct + '%';
+}
+
+// ---- RENDER WORKERS ----
+function renderWorkers() {
+  var html = workers.map(function(w) {
+    var initials = w.name.split(' ').map(function(n){ return n[0]; }).join('').toUpperCase();
+    var isToday = todayWorker && w.id === todayWorker.id;
+    return '<div class="worker-card">'
+      + '<div class="worker-avatar">' + initials + '</div>'
+      + '<div class="worker-info">'
+      + '<div class="worker-name">' + w.name + (isToday ? ' <span class="badge badge-green">Today</span>' : '') + '</div>'
+      + '<div class="worker-num">' + w.num + '</div>'
+      + '</div>'
+      + '<button class="btn btn-sm btn-ghost" onclick="setTodayWorker(' + w.id + ')">Set today</button>'
+      + '<button class="icon-btn" onclick="deleteWorker(' + w.id + ')">✕</button>'
+      + '</div>';
+  }).join('');
+  document.getElementById('workers-card').innerHTML = html || '<div class="empty-state">No workers added yet</div>';
+}
+
+// ---- RENDER HANDOVER ----
+function renderHandover() {
+  var box = document.getElementById('last-handover-box');
+  var wbox = document.getElementById('w-handover-box');
+  if (lastHandover) {
+    var html = '<div class="handover-label">From ' + lastHandover.worker + '</div>'
+      + '<div class="handover-text">' + lastHandover.text + '</div>';
+    box.innerHTML = html;
+    wbox.innerHTML = html;
+  }
+}
+
+// ---- RENDER APPT ----
+function renderAppt() {
+  if (appt) {
+    var txt = appt.type + ' at ' + appt.time;
+    if (appt.location) txt += ' — ' + appt.location;
+    if (appt.leave) txt += '. Leave by ' + appt.leave;
+    document.getElementById('appt-alert-text').textContent = txt;
+    document.getElementById('appt-alert').style.display = 'flex';
+    document.getElementById('w-appt-text').textContent = txt + '. Please don\'t be late.';
+    document.getElementById('w-appt-alert').style.display = 'flex';
+    if (document.getElementById('appt-type')) document.getElementById('appt-type').value = appt.type || '';
+    if (document.getElementById('appt-time')) document.getElementById('appt-time').value = appt.time || '';
+    if (document.getElementById('appt-location')) document.getElementById('appt-location').value = appt.location || '';
+    if (document.getElementById('appt-leave')) document.getElementById('appt-leave').value = appt.leave || '';
+  } else {
+    document.getElementById('appt-alert').style.display = 'none';
+    document.getElementById('w-appt-alert').style.display = 'none';
+  }
+}
+
+// ---- ACTIONS ----
+function toggleCheck(id) {
+  var t = tasks.find(function(t){ return t.id === id; });
+  if (t) { t.done = !t.done; saveState(); renderWorkerLists(); }
+}
+
+function deleteTask(id) {
+  tasks = tasks.filter(function(t){ return t.id !== id; });
+  saveState(); renderMarkTasks(); renderWorkerLists();
+}
+
+function openAddForm() {
+  document.getElementById('add-form').style.display = 'block';
+  document.getElementById('new-task-name').focus();
+}
+function closeAddForm() {
+  document.getElementById('add-form').style.display = 'none';
+  ['new-task-name','new-task-note'].forEach(function(id){ document.getElementById(id).value = ''; });
+}
+function saveTask() {
+  var name = document.getElementById('new-task-name').value.trim();
+  if (!name) return;
+  tasks.push({
+    id: Date.now(),
+    name: name,
+    note: document.getElementById('new-task-note').value.trim(),
+    freq: document.getElementById('new-task-freq').value,
+    priority: document.getElementById('new-task-priority').value,
+    done: false
+  });
+  saveState(); renderMarkTasks(); renderWorkerLists(); closeAddForm();
+}
+
+function openWorkerForm() { document.getElementById('worker-add-form').style.display = 'block'; }
+function closeWorkerForm() { document.getElementById('worker-add-form').style.display = 'none'; }
+function saveWorker() {
+  var name = document.getElementById('new-worker-name').value.trim();
+  var num = document.getElementById('new-worker-num').value.replace(/\s/g,'');
+  if (!name || !num) return;
+  workers.push({ id: Date.now(), name: name, num: num });
+  saveState(); renderWorkers(); closeWorkerForm();
+  document.getElementById('new-worker-name').value = '';
+  document.getElementById('new-worker-num').value = '';
+}
+function deleteWorker(id) {
+  workers = workers.filter(function(w){ return w.id !== id; });
+  if (todayWorker && todayWorker.id === id) todayWorker = null;
+  saveState(); renderWorkers(); updateTodayHeader();
+}
+function setTodayWorker(id) {
+  todayWorker = workers.find(function(w){ return w.id === id; });
+  saveState(); renderWorkers(); updateTodayHeader();
+}
+
+function saveAppt() {
+  var type = document.getElementById('appt-type').value.trim();
+  var time = document.getElementById('appt-time').value.trim();
+  if (!type || !time) return;
+  appt = {
+    type: type,
+    time: time,
+    location: document.getElementById('appt-location').value.trim(),
+    leave: document.getElementById('appt-leave').value.trim()
+  };
+  saveState(); renderAppt();
+  var saved = document.getElementById('appt-saved');
+  saved.style.display = 'flex';
+  setTimeout(function(){ saved.style.display = 'none'; }, 2500);
+}
+function clearAppt() {
+  appt = null;
+  saveState(); renderAppt();
+  ['appt-type','appt-time','appt-location','appt-leave'].forEach(function(id){ document.getElementById(id).value = ''; });
+}
+
+function buildMessage() {
+  var workerFirst = todayWorker ? todayWorker.name.split(' ')[0] : 'there';
+  var must = tasks.filter(function(t){ return t.priority === 'must'; });
+  var nice = tasks.filter(function(t){ return t.priority === 'nice'; });
+  var msg = 'Hey ' + workerFirst + ' \uD83D\uDC4B\n\nQuick heads up for today with Mark:\n\n';
+  if (appt) {
+    msg += '\u26A0\uFE0F APPOINTMENT: ' + appt.type + ' at ' + appt.time;
+    if (appt.location) msg += ' \u2014 ' + appt.location;
+    if (appt.leave) msg += '\n   Leave by ' + appt.leave + ' \u2014 please don\'t be late';
+    msg += '\n\n';
+  }
+  msg += '\u2705 MUST DO today:\n';
+  must.forEach(function(t){ msg += '\u2610 ' + t.name + (t.note ? ' \u2014 ' + t.note : '') + '\n'; });
+  if (nice.length) {
+    msg += '\n\uD83D\uDC4D Nice to do if time:\n';
+    nice.forEach(function(t){ msg += '\u2610 ' + t.name + (t.note ? ' \u2014 ' + t.note : '') + '\n'; });
+  }
+  if (lastHandover) {
+    msg += '\nFrom last shift: ' + lastHandover.text;
+  }
+  msg += '\n\nAny questions just message me. Cheers!';
+  return msg;
+}
+
+function showBriefingPreview() {
+  if (!todayWorker) { alert('Set today\'s worker first under the Workers tab.'); return; }
+  var msg = buildMessage();
+  document.getElementById('wa-message-text').textContent = msg;
+  var num = todayWorker.num.replace(/^0/, '61').replace(/\s/g,'');
+  document.getElementById('wa-link').href = 'https://wa.me/' + num + '?text=' + encodeURIComponent(msg);
+  document.getElementById('wa-preview-box').style.display = 'block';
+  document.getElementById('wa-link').onclick = function(){
+    document.getElementById('sent-confirm').style.display = 'flex';
+  };
+}
+
+function submitHandover() {
+  var txt = document.getElementById('handover-text').value.trim();
+  if (!txt) { document.getElementById('handover-text').focus(); return; }
+  var workerName = todayWorker ? todayWorker.name : 'Last worker';
+  lastHandover = { worker: workerName, text: txt };
+  saveState(); renderHandover();
+  document.getElementById('handover-done').style.display = 'flex';
+  document.getElementById('handover-text').disabled = true;
+  document.querySelector('.handover-write button').disabled = true;
+}
+
+function showTab(t) {
+  var tabs = ['mark','worker','workers-list','appt'];
+  tabs.forEach(function(id){
+    document.getElementById('tab-' + id).classList.toggle('active', id === t);
+  });
+  document.querySelectorAll('.tab-btn').forEach(function(b, i){
+    b.classList.toggle('active', tabs[i] === t);
+  });
+}
+
+// ---- INIT ----
+loadState();
+renderMarkTasks();
+renderWorkerLists();
+renderWorkers();
+renderHandover();
+renderAppt();
+updateTodayHeader();
+</script>
+</body>
+</html>
